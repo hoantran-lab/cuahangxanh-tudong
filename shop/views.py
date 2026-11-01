@@ -55,11 +55,14 @@ def _redirect_back(request):
 @require_POST
 def cart_add(request, product_id):
     product = get_object_or_404(Product, pk=product_id)
-    if product.is_available:
-        Cart(request.session).add(product.id)
-        messages.success(request, f"Đã thêm {product.name} vào giỏ hàng.")
-    else:
+    cart = Cart(request.session)
+    if not product.is_available:
         messages.error(request, f"{product.name} đã hết hàng.")
+    elif cart.items.get(str(product.id), 0) >= MAX_QUANTITY:
+        messages.error(request, f"{product.name} đã đạt số lượng tối đa {MAX_QUANTITY}.")
+    else:
+        cart.add(product.id)
+        messages.success(request, f"Đã thêm {product.name} vào giỏ hàng.")
     return _redirect_back(request)
 
 

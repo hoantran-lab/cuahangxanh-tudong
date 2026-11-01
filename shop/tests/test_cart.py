@@ -42,6 +42,26 @@ class CartViewTests(CartTestBase):
         self.assertEqual(response.context["cart_count"], 0)
         self.assertContains(response, "đã hết hàng")
 
+    def test_add_at_max_quantity_says_so(self):
+        self.add(self.spinach)
+        self.client.post(
+            reverse("shop:cart_update", args=[self.spinach.id]), {"quantity": str(MAX_QUANTITY)}
+        )
+        self.client.get(reverse("shop:cart"))  # đọc hết thông báo cũ
+        response = self.client.post(reverse("shop:cart_add", args=[self.spinach.id]), follow=True)
+        self.assertNotContains(response, "Đã thêm")
+        self.assertContains(response, "tối đa 99")
+        self.assertEqual(response.context["cart_count"], MAX_QUANTITY)
+
+    def test_add_reaching_max_quantity_still_says_added(self):
+        self.add(self.spinach)
+        self.client.post(
+            reverse("shop:cart_update", args=[self.spinach.id]), {"quantity": str(MAX_QUANTITY - 1)}
+        )
+        response = self.client.post(reverse("shop:cart_add", args=[self.spinach.id]), follow=True)
+        self.assertContains(response, "Đã thêm")
+        self.assertEqual(response.context["cart_count"], MAX_QUANTITY)
+
     def test_add_unknown_product_is_404(self):
         self.assertEqual(self.client.post(reverse("shop:cart_add", args=[999999])).status_code, 404)
 
