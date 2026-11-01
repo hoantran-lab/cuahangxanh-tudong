@@ -27,3 +27,16 @@ form.inline input { width: 4.5rem; padding: 6px; }
 form.inline button { width: auto; padding: 6px 10px; }
 .cart-total { text-align: right; font-size: 1.1rem; }
 a.button { display: inline-block; padding: 8px 16px; border-radius: 6px; background: #2e7d32; color: #fff; text-decoration: none; }
+
+/* Điện thoại: mỗi dòng giỏ hàng xếp dọc, không cần cuộn ngang. */
+@media (max-width: 600px) {
+  .cart thead { display: none; }
+  .cart, .cart tbody, .cart tr { display: block; }
+  .cart tr { padding: 10px 12px; border-bottom: 1px solid #c8e6c9; }
+  .cart td { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 4px 0; border-bottom: 0; }
+  .cart td::before { content: attr(data-label); color: #5b6b5b; }
+  .cart td.cart-product { display: block; font-weight: bold; }
+  .cart td.cart-product .meta { font-weight: normal; }
+  .cart td.cart-product::before, .cart td.cart-remove::before { content: none; }
+  .cart td.cart-remove { justify-content: flex-end; }
+}

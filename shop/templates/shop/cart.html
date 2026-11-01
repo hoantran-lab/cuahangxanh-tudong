@@ -11,20 +11,20 @@
     <tbody>
       {% for line in lines %}
         <tr{% if not line.product.is_available %} class="out-of-stock"{% endif %}>
-          <td>
+          <td class="cart-product">
             {{ line.product.name }} <span class="meta">({{ line.product.package_label }})</span>
             {% if not line.product.is_available %}<strong class="sold-out">Hết hàng</strong>{% endif %}
           </td>
-          <td>{{ line.product.price|vnd }}</td>
-          <td>
+          <td data-label="Đơn giá">{{ line.product.price|vnd }}</td>
+          <td data-label="Số lượng">
             <form method="post" action="{% url 'shop:cart_update' line.product.id %}" class="inline">
               {% csrf_token %}
               <input type="number" name="quantity" value="{{ line.quantity }}" min="1" max="99">
               <button type="submit">Cập nhật</button>
             </form>
           </td>
-          <td>{{ line.line_total|vnd }}</td>
-          <td>
+          <td data-label="Thành tiền">{{ line.line_total|vnd }}</td>
+          <td class="cart-remove">
             <form method="post" action="{% url 'shop:cart_remove' line.product.id %}" class="inline">
               {% csrf_token %}
               <button type="submit">Xóa</button>
