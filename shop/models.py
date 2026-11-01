@@ -1,14 +1,16 @@
+import uuid
+
 from django.db import models
 
 
 class Category(models.Model):
-    name = models.CharField("tên danh mục", max_length=100)
+    name = models.CharField("tên nhóm hàng", max_length=100)
     position = models.PositiveIntegerField("thứ tự", default=0)
 
     class Meta:
         ordering = ["position"]
-        verbose_name = "danh mục"
-        verbose_name_plural = "danh mục"
+        verbose_name = "nhóm hàng"
+        verbose_name_plural = "nhóm hàng"
 
     def __str__(self):
         return self.name
@@ -24,13 +26,13 @@ class Product(models.Model):
         Category,
         on_delete=models.CASCADE,
         related_name="products",
-        verbose_name="danh mục",
+        verbose_name="nhóm hàng",
     )
     image = models.ImageField("hình ảnh", upload_to="products/", blank=True)
     price = models.PositiveIntegerField("giá (đồng)")
     package_label = models.CharField("quy cách", max_length=50)
     origin = models.CharField(
-        "xuất xứ", max_length=10, choices=Origin.choices, default=Origin.DOMESTIC
+        "nguồn gốc", max_length=10, choices=Origin.choices, default=Origin.DOMESTIC
     )
     is_available = models.BooleanField("còn hàng", default=True)
 
@@ -48,6 +50,8 @@ class Order(models.Model):
     address = models.CharField("địa chỉ", max_length=255)
     created_at = models.DateTimeField("thời gian đặt", auto_now_add=True)
     total = models.PositiveIntegerField("tổng tiền (đồng)")
+    # Mỗi trang đặt hàng có một mã riêng, nên gửi lại cùng form không tạo thêm đơn.
+    submission_token = models.UUIDField(default=uuid.uuid4, unique=True, editable=False)
 
     class Meta:
         ordering = ["-created_at"]

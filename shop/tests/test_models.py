@@ -42,3 +42,12 @@ class OrderItemTests(TestCase):
         self.assertIsNone(self.item.product)
         self.assertEqual(self.item.product_name, "Rau muống")
         self.assertEqual(self.item.unit_price, 15000)
+
+
+class WordingTests(SimpleTestCase):
+    def test_uses_spec_terms_for_category_and_origin(self):
+        self.assertEqual(Category._meta.verbose_name, "nhóm hàng")
+        self.assertEqual(Category._meta.verbose_name_plural, "nhóm hàng")
+        self.assertEqual(Category._meta.get_field("name").verbose_name, "tên nhóm hàng")
+        self.assertEqual(Product._meta.get_field("category").verbose_name, "nhóm hàng")
+        self.assertEqual(Product._meta.get_field("origin").verbose_name, "nguồn gốc")

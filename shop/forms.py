@@ -8,6 +8,7 @@ class CheckoutForm(forms.Form):
     phone = forms.CharField(label="Số điện thoại", max_length=20)
     address = forms.CharField(label="Địa chỉ giao hàng", max_length=255)
     cart_signature = forms.CharField(widget=forms.HiddenInput, required=False)
+    submission_token = forms.UUIDField(widget=forms.HiddenInput)
 
     def clean_phone(self):
         phone = re.sub(r"[ .\-]", "", self.cleaned_data["phone"])

@@ -1,3 +1,5 @@
+import uuid
+
 from django.contrib import messages
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.http import url_has_allowed_host_and_scheme
@@ -83,8 +85,6 @@ def cart_remove(request, product_id):
 
 def checkout(request):
     cart = Cart(request.session)
-    if not cart.lines():
-        return redirect("shop:cart")
 
     if request.method == "POST":
         form = CheckoutForm(request.POST)
@@ -97,16 +97,21 @@ def checkout(request):
                     data["phone"],
                     data["address"],
                     data["cart_signature"],
+                    data["submission_token"],
                 )
             except CartChanged:
                 messages.error(request, "Giỏ hàng vừa thay đổi, vui lòng kiểm tra lại trước khi đặt.")
                 return redirect("shop:cart")
             request.session[LAST_ORDER_KEY] = order.id
             return redirect("shop:order_success", order_id=order.id)
-    else:
-        if cart.has_unavailable():
+        if not cart.lines():
             return redirect("shop:cart")
-        form = CheckoutForm(initial={"cart_signature": cart.signature()})
+    else:
+        if not cart.lines() or cart.has_unavailable():
+            return redirect("shop:cart")
+        form = CheckoutForm(
+            initial={"cart_signature": cart.signature(), "submission_token": uuid.uuid4()}
+        )
 
     return render(
         request,
