@@ -12,6 +12,6 @@ class CheckoutForm(forms.Form):
 
     def clean_phone(self):
         phone = re.sub(r"[ .\-]", "", self.cleaned_data["phone"])
-        if not re.fullmatch(r"0\d{9}", phone):
+        if not re.fullmatch(r"0[0-9]{9}", phone):
             raise forms.ValidationError("Số điện thoại phải có 10 chữ số và bắt đầu bằng 0.")
         return phone

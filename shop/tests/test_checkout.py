@@ -93,6 +93,12 @@ class CheckoutTests(CheckoutBase):
             self.assertEqual(Order.objects.count(), 0)
             self.assertEqual(response.context["cart_count"], 2)
 
+    def test_phone_with_non_ascii_digits_rejected(self):
+        response = self.submit(phone="0٩٠١٢٣٤٥٦٧")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("phone", response.context["form"].errors)
+        self.assertEqual(Order.objects.count(), 0)
+
     def test_vietnamese_text_saved_intact(self):
         self.submit(customer_name="Nguyễn Thị Ánh")
         self.assertEqual(Order.objects.get().customer_name, "Nguyễn Thị Ánh")
