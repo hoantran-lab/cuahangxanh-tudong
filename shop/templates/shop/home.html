@@ -1,0 +1,36 @@
+{% extends "shop/base.html" %}
+{% load shop_extras %}
+{% block content %}
+<nav class="categories">
+  <a href="{% url 'shop:home' %}" class="{% if not selected %}active{% endif %}">Tất cả</a>
+  {% for category in categories %}
+    <a href="{% url 'shop:home' %}?category={{ category.id }}"
+       class="{% if selected and selected.id == category.id %}active{% endif %}">{{ category.name }}</a>
+  {% endfor %}
+</nav>
+
+<div class="product-grid">
+  {% for product in products %}
+    <article class="product{% if not product.is_available %} out-of-stock{% endif %}">
+      {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.name }}">
+      {% else %}
+        <div class="no-image">Chưa có ảnh</div>
+      {% endif %}
+      <h2>{{ product.name }}</h2>
+      <p class="meta">{{ product.package_label }} · {{ product.get_origin_display }}</p>
+      <p class="price">{{ product.price|vnd }}</p>
+      {% if product.is_available %}
+        <form method="post" action="/gio-hang/them/{{ product.id }}/">
+          {% csrf_token %}
+          <button type="submit">Thêm vào giỏ</button>
+        </form>
+      {% else %}
+        <p class="sold-out">Hết hàng</p>
+      {% endif %}
+    </article>
+  {% empty %}
+    <p>Chưa có sản phẩm nào.</p>
+  {% endfor %}
+</div>
+{% endblock %}
