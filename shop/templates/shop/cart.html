@@ -1,0 +1,47 @@
+{% extends "shop/base.html" %}
+{% load shop_extras %}
+{% block title %}Giỏ hàng - Cửa hàng Xanh{% endblock %}
+{% block content %}
+<h1>Giỏ hàng</h1>
+{% if lines %}
+  <table class="cart">
+    <thead>
+      <tr><th>Sản phẩm</th><th>Đơn giá</th><th>Số lượng</th><th>Thành tiền</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for line in lines %}
+        <tr{% if not line.product.is_available %} class="out-of-stock"{% endif %}>
+          <td>
+            {{ line.product.name }} <span class="meta">({{ line.product.package_label }})</span>
+            {% if not line.product.is_available %}<strong class="sold-out">Hết hàng</strong>{% endif %}
+          </td>
+          <td>{{ line.product.price|vnd }}</td>
+          <td>
+            <form method="post" action="{% url 'shop:cart_update' line.product.id %}" class="inline">
+              {% csrf_token %}
+              <input type="number" name="quantity" value="{{ line.quantity }}" min="1" max="99">
+              <button type="submit">Cập nhật</button>
+            </form>
+          </td>
+          <td>{{ line.line_total|vnd }}</td>
+          <td>
+            <form method="post" action="{% url 'shop:cart_remove' line.product.id %}" class="inline">
+              {% csrf_token %}
+              <button type="submit">Xóa</button>
+            </form>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <p class="cart-total">Tổng cộng: <strong>{{ total|vnd }}</strong></p>
+  {% if has_unavailable %}
+    <p class="sold-out">Có sản phẩm đã hết hàng. Vui lòng xóa khỏi giỏ để đặt hàng.</p>
+  {% else %}
+    <a class="button" href="/dat-hang/">Đặt hàng</a>
+  {% endif %}
+{% else %}
+  <p>Giỏ hàng đang trống.</p>
+  <a class="button" href="{% url 'shop:home' %}">Tiếp tục mua sắm</a>
+{% endif %}
+{% endblock %}

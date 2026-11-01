@@ -21,7 +21,7 @@
       <p class="meta">{{ product.package_label }} · {{ product.get_origin_display }}</p>
       <p class="price">{{ product.price|vnd }}</p>
       {% if product.is_available %}
-        <form method="post" action="/gio-hang/them/{{ product.id }}/">
+        <form method="post" action="{% url 'shop:cart_add' product.id %}">
           {% csrf_token %}
           <button type="submit">Thêm vào giỏ</button>
         </form>

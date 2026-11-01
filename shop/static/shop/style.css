@@ -20,3 +20,10 @@ button { width: 100%; padding: 8px; border: 0; border-radius: 6px; background: #
 button:hover { background: #1b5e20; }
 .out-of-stock { opacity: 0.55; }
 .sold-out { margin: 0; text-align: center; font-weight: bold; color: #b71c1c; }
+.cart { width: 100%; border-collapse: collapse; background: #fff; }
+.cart th, .cart td { padding: 8px; border-bottom: 1px solid #c8e6c9; text-align: left; }
+form.inline { display: flex; gap: 6px; align-items: center; }
+form.inline input { width: 4.5rem; padding: 6px; }
+form.inline button { width: auto; padding: 6px 10px; }
+.cart-total { text-align: right; font-size: 1.1rem; }
+a.button { display: inline-block; padding: 8px 16px; border-radius: 6px; background: #2e7d32; color: #fff; text-decoration: none; }
