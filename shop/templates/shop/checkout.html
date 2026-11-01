@@ -1,0 +1,19 @@
+{% extends "shop/base.html" %}
+{% load shop_extras %}
+{% block title %}Đặt hàng - Cửa hàng Xanh{% endblock %}
+{% block content %}
+<h1>Đặt hàng</h1>
+<ul>
+  {% for line in lines %}
+    <li>{{ line.product.name }} ({{ line.product.package_label }}) x {{ line.quantity }} - {{ line.line_total|vnd }}</li>
+  {% endfor %}
+</ul>
+<p class="cart-total">Tổng cộng: <strong>{{ total|vnd }}</strong></p>
+<p>Thanh toán: trả tiền khi nhận hàng.</p>
+<form method="post" action="{% url 'shop:checkout' %}">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Xác nhận đặt hàng</button>
+</form>
+<a href="{% url 'shop:cart' %}">Quay lại giỏ hàng</a>
+{% endblock %}

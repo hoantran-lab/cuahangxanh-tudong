@@ -1,0 +1,8 @@
+{% extends "shop/base.html" %}
+{% block title %}Đặt hàng thành công - Cửa hàng Xanh{% endblock %}
+{% block content %}
+<h1>Đặt hàng thành công</h1>
+<p>Cảm ơn bạn! Mã đơn hàng của bạn là <strong>#{{ order_id }}</strong>.</p>
+<p>Chúng tôi sẽ liên hệ và giao hàng sớm. Bạn trả tiền khi nhận hàng.</p>
+<a class="button" href="{% url 'shop:home' %}">Tiếp tục mua sắm</a>
+{% endblock %}

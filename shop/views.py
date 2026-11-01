@@ -4,7 +4,11 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from .cart import MAX_QUANTITY, Cart
+from .forms import CheckoutForm
 from .models import Category, Product
+from .orders import CartChanged, place_order
+
+LAST_ORDER_KEY = "last_order_id"
 
 
 def home(request):
@@ -75,3 +79,43 @@ def cart_update(request, product_id):
 def cart_remove(request, product_id):
     Cart(request.session).remove(product_id)
     return redirect("shop:cart")
+
+
+def checkout(request):
+    cart = Cart(request.session)
+    if not cart.lines():
+        return redirect("shop:cart")
+
+    if request.method == "POST":
+        form = CheckoutForm(request.POST)
+        if form.is_valid():
+            data = form.cleaned_data
+            try:
+                order = place_order(
+                    cart,
+                    data["customer_name"],
+                    data["phone"],
+                    data["address"],
+                    data["cart_signature"],
+                )
+            except CartChanged:
+                messages.error(request, "Giỏ hàng vừa thay đổi, vui lòng kiểm tra lại trước khi đặt.")
+                return redirect("shop:cart")
+            request.session[LAST_ORDER_KEY] = order.id
+            return redirect("shop:order_success", order_id=order.id)
+    else:
+        if cart.has_unavailable():
+            return redirect("shop:cart")
+        form = CheckoutForm(initial={"cart_signature": cart.signature()})
+
+    return render(
+        request,
+        "shop/checkout.html",
+        {"form": form, "lines": cart.lines(), "total": cart.total()},
+    )
+
+
+def order_success(request, order_id):
+    if request.session.get(LAST_ORDER_KEY) != order_id:
+        return redirect("shop:home")
+    return render(request, "shop/order_success.html", {"order_id": order_id})

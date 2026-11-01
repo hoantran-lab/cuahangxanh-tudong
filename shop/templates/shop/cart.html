@@ -38,7 +38,7 @@
   {% if has_unavailable %}
     <p class="sold-out">Có sản phẩm đã hết hàng. Vui lòng xóa khỏi giỏ để đặt hàng.</p>
   {% else %}
-    <a class="button" href="/dat-hang/">Đặt hàng</a>
+    <a class="button" href="{% url 'shop:checkout' %}">Đặt hàng</a>
   {% endif %}
 {% else %}
   <p>Giỏ hàng đang trống.</p>
