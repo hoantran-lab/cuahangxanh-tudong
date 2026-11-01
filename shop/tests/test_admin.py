@@ -1,9 +1,15 @@
+from django.apps import apps
 from django.contrib.admin import site
 from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
 from shop.models import Category, Order, OrderItem, Product
+
+
+class AppNameTests(TestCase):
+    def test_app_name_is_vietnamese(self):
+        self.assertEqual(apps.get_app_config("shop").verbose_name, "Cửa hàng")
 
 
 class AdminAccessTests(TestCase):
@@ -81,6 +87,36 @@ class OrderAdminTests(AdminTestBase):
         response = self.client.get(reverse("admin:shop_order_change", args=[self.order.id]))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, "Rau muống")
+
+    def test_list_header_reads_ma_don_and_sorts_by_id(self):
+        response = self.client.get(reverse("admin:shop_order_changelist"))
+        self.assertContains(response, "Mã đơn")
+        self.assertContains(response, "sortable column-order_code")
+        self.assertEqual(self.client.get(reverse("admin:shop_order_changelist"), {"o": "1"}).status_code, 200)
+
+    def test_detail_shows_money_as_vnd(self):
+        OrderItem.objects.create(
+            order=self.order,
+            product=self.product,
+            product_name="Trứng gà",
+            package_label="Vỉ 10 quả",
+            unit_price=35000,
+            quantity=3,
+        )
+        Order.objects.filter(pk=self.order.pk).update(total=135000)
+        response = self.client.get(reverse("admin:shop_order_change", args=[self.order.id]))
+        for text in ["135.000đ", "15.000đ", "30.000đ", "35.000đ", "105.000đ"]:
+            self.assertContains(response, text)
+        for raw in ["135000", "15000", "30000", "35000", "105000"]:
+            self.assertNotContains(response, raw)
+
+    def test_order_can_be_deleted(self):
+        response = self.client.post(
+            reverse("admin:shop_order_delete", args=[self.order.id]), {"post": "yes"}
+        )
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(Order.objects.count(), 0)
+        self.assertEqual(OrderItem.objects.count(), 0)
 
     def test_orders_cannot_be_added_or_edited(self):
         self.assertEqual(self.client.get(reverse("admin:shop_order_add")).status_code, 403)

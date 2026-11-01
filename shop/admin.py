@@ -20,8 +20,16 @@ class ProductAdmin(admin.ModelAdmin):
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 0
-    fields = ["product_name", "package_label", "unit_price", "quantity"]
+    fields = ["product_name", "package_label", "unit_price_display", "quantity", "line_total_display"]
     readonly_fields = fields
+
+    @admin.display(description="đơn giá")
+    def unit_price_display(self, obj):
+        return format_vnd(obj.unit_price)
+
+    @admin.display(description="thành tiền")
+    def line_total_display(self, obj):
+        return format_vnd(obj.line_total)
 
     def has_add_permission(self, request, obj=None):
         return False
@@ -35,8 +43,14 @@ class OrderItemInline(admin.TabularInline):
 
 @admin.register(Order)
 class OrderAdmin(admin.ModelAdmin):
-    list_display = ["id", "created_at", "customer_name", "phone", "total_display"]
+    list_display = ["order_code", "created_at", "customer_name", "phone", "total_display"]
+    fields = ["customer_name", "phone", "address", "total_display"]
+    readonly_fields = ["total_display"]
     inlines = [OrderItemInline]
+
+    @admin.display(description="Mã đơn", ordering="id")
+    def order_code(self, obj):
+        return obj.id
 
     @admin.display(description="tổng tiền", ordering="total")
     def total_display(self, obj):
