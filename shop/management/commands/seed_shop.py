@@ -5,7 +5,7 @@ from shop.models import Category, Product
 DOMESTIC = Product.Origin.DOMESTIC
 IMPORTED = Product.Origin.IMPORTED
 
-# (tên danh mục, [(tên, giá, quy cách, xuất xứ), ...])
+# (tên nhóm hàng, [(tên, giá, quy cách, nguồn gốc), ...])
 SAMPLE_DATA = [
     ("Rau", [
         ("Rau muống", 15000, "Bó 500g", DOMESTIC),
@@ -42,7 +42,7 @@ SAMPLE_DATA = [
 
 
 class Command(BaseCommand):
-    help = "Tạo dữ liệu mẫu (danh mục và sản phẩm). Chạy lại không đè giá đã sửa."
+    help = "Tạo dữ liệu mẫu (nhóm hàng và sản phẩm). Chạy lại không đè giá đã sửa."
 
     def handle(self, *args, **options):
         created = 0
@@ -53,8 +53,8 @@ class Command(BaseCommand):
             for name, price, package_label, origin in products:
                 _, was_created = Product.objects.get_or_create(
                     name=name,
-                    category=category,
                     defaults={
+                        "category": category,
                         "price": price,
                         "package_label": package_label,
                         "origin": origin,
