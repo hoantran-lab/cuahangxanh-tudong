@@ -40,7 +40,7 @@ class HomePageTests(TestCase):
         self.assertNotContains(response, "Rau muống")
 
     def test_bad_category_shows_all(self):
-        for value in ["abc", "999999"]:
+        for value in ["abc", "999999", "99999999999999999999999"]:
             response = self.client.get(reverse("shop:home"), {"category": value})
             self.assertEqual(response.status_code, 200)
             self.assertContains(response, "Rau muống")

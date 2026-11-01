@@ -1,10 +1,11 @@
 import uuid
+from unittest.mock import patch
 
 from django.test import Client, TestCase
 from django.urls import reverse
 
 from shop.cart import Cart
-from shop.models import Category, Order, Product
+from shop.models import Category, Order, OrderItem, Product
 from shop.orders import place_order
 
 
@@ -98,6 +99,31 @@ class CheckoutTests(CheckoutBase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("phone", response.context["form"].errors)
         self.assertEqual(Order.objects.count(), 0)
+
+    def test_failure_while_creating_lines_leaves_no_order_and_keeps_cart(self):
+        data = self.form_data()
+        self.client.raise_request_exception = False
+        with patch.object(OrderItem.objects, "bulk_create", side_effect=RuntimeError("lỗi thử")):
+            with self.assertLogs("django.request", "ERROR"):
+                response = self.client.post(reverse("shop:checkout"), data)
+        self.assertEqual(response.status_code, 500)
+        self.assertEqual(Order.objects.count(), 0)
+        self.assertEqual(self.client.get(reverse("shop:cart")).context["cart_count"], 2)
+
+    def test_get_with_unavailable_item_redirects_to_cart(self):
+        Product.objects.update(is_available=False)
+        self.assertRedirects(self.client.get(reverse("shop:checkout")), reverse("shop:cart"))
+
+    def test_get_with_deleted_product_shows_page_without_that_line(self):
+        eggs = Product.objects.create(
+            name="Trứng gà", category=self.spinach.category, price=35000, package_label="Vỉ 10 quả"
+        )
+        self.client.post(reverse("shop:cart_add", args=[eggs.id]), follow=True)
+        eggs.delete()
+        response = self.client.get(reverse("shop:checkout"))
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, "Rau muống")
+        self.assertNotContains(response, "Trứng gà")
 
     def test_vietnamese_text_saved_intact(self):
         self.submit(customer_name="Nguyễn Thị Ánh")
